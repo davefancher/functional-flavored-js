@@ -1,40 +1,328 @@
 <!doctype html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<title>reveal.js</title>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-		<link rel="stylesheet" href="dist/reset.css">
-		<link rel="stylesheet" href="dist/reveal.css">
-		<link rel="stylesheet" href="dist/theme/black.css">
+	<title>reveal.js</title>
 
-		<!-- Theme used for syntax highlighted code -->
-		<link rel="stylesheet" href="plugin/highlight/monokai.css">
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
-			</div>
+	<link rel="stylesheet" href="dist/reset.css">
+	<link rel="stylesheet" href="dist/reveal.css">
+	<link rel="stylesheet" href="dist/theme/moon.css">
+
+	<!-- Theme used for syntax highlighted code -->
+	<link rel="stylesheet" href="plugin/highlight/monokai.css">
+</head>
+
+<body>
+	<div class="reveal">
+		<div class="slides">
+			<section>
+				<h2>Functional-Flavored JavaScript</h2>
+				<hr />
+				<h3>Dave Fancher</h3>
+			</section>
+
+			<section>
+				<h2>About This Presentation</h2>
+				<ul>
+					<li>My background</li>
+					<li>Node.js-centric</li>
+					<li>Current project built with these techniques</li>
+				</ul>
+			</section>
+
+			<section>
+				<h2>Tenets of Functional Programming</h2>
+
+				<ol>
+					<li>Purity/controlling side-effects</li>
+					<li>Favor expressions over statements</li>
+					<li>Functions as data</li>
+				</ol>
+			</section>
+
+			<section>
+				<section>
+					<h2>Purity/controlling side-effects</h2>
+
+					<aside class="notes">
+						<ul>
+							<li>Programs need to do something</li>
+							<li>Prefer immutability where possible</li>
+							<li>
+								Separate data from behavior
+								<ul>
+									<li>A method is a function with implied context</li>
+									<li>Functions should be given what they need to do their job</li>
+									<li>Explicitly pass in anything the function needs to make dependencies obvious</li>
+									<li>Acting upon implied context encourages side-effects</li>
+									<li>Providing all necessary input encourages composition</li>
+								</ul>
+							</li>
+							<li>
+								Limit side-effects to narrow scopes
+								<ul>
+									<li>Sometimes modifying values in-place is preferable to copying</li>
+								</ul>
+							</li>
+						</ul>
+					</aside>
+				</section>
+
+				<section>
+					<h2>Immutability - Object.freeze</h3>
+
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers="1-8">
+const song = Object.freeze({
+	name: "Never Gonna Give You Up",
+	artist: "Rick Astley",
+	album: "Whenever You Need Somebody",
+	year: 1987,
+	duration: "03:30",
+	genre: [ "pop", "soul" ]
+});
+
+// Often silently fails unless in strict mode
+song.name = "NEVER GONNA GIVE YOU UP"; 
+
+// Pushes "dance" into the genre array unless the array is also frozen
+song.genre.push("dance");
+						</code>
+					</pre>
+				</section>
+
+				<section>
+					<h2>Immutability - defineProperty</h2>
+
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers="3-9">
+const song = {};
+
+Reflect.defineProperty(
+	song,
+	"name",
+	{
+		value: "Never Gonna Give You Up",
+		enumerable: true,
+		writable: false
+	});
+
+song.name = "NEVER GONNA GIVE YOU UP";
+						</code>
+					</pre>
+				</section>
+			</section>
+
+			<section>
+				<section>
+					<h2>Arrow Functions</h2>
+
+					<ul>
+						<li>Not just shorthand for classic functions</li>
+						<li>The limitations are generally <em>good</em> for functional-flavored JS</li>
+						<li>Bodied or implicit returns</li>
+						<li>Encourage composition</li>
+						<li>Can still close around values</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Arrow Functions - Basic Examples</h2>
+
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers>
+const toUpperCase = x => x.toUpperCase();
+const toLowerCase = x => x.toLowerCase();
+
+toUpperCase("codestock"); // CODESTOCK
+toLowerCase("CODESTOCK"); // codestock
+						</code>
+					</pre>
+				</section>
+			</section>
+
+			<section>
+				<section>
+					<h2>Functions as Data - Array Methods</h2>
+
+					<ul>
+						<li>Perhaps the most obvious/readily available case</li>
+						<li>Naturally composable through a fluent interface</li>
+						<li>
+							Examples:
+							<ul>
+								<li>filter</li>
+								<li>sort</li>
+								<li>map</li>
+								<li>join</li>
+							</ul>
+						</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Array Methods - Example</h2>
+
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers>
+"The quick brown fox jumps over the lazy dog"
+	.split(" ")
+	.filter(w => w.length >= 4)
+	.sort()
+	.map(toUpperCase)
+	.join(" "); // BROWN JUMPS LAZY OVER QUICK
+						</code>
+					</pre>
+				</section>
+
+				<section>
+					<h2>One Function to Rule Them All</h2>
+
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers>
+"The quick brown fox jumps over the lazy dog"
+	.split(" ")
+	// Filter
+	.reduce(
+		(filtered, word) => {
+			if (word.length >= 4) {
+				filtered.push(word);
+			}
+
+			return filtered;
+		},
+		[])
+	// Sort
+	.reduce(
+		(sorted, word) => {
+			const nextIndex =
+				sorted.findIndex(w => word.localeCompare(w) < 0);
+			sorted.splice(nextIndex, 0, word);
+
+			return sorted;
+		},
+		[])
+	// Map
+	.reduce(
+		(words, word) => {
+			const ucWord = toUpperCase(word)
+			words.push(ucWord);
+
+			return words;
+		},
+		[])
+	// Join
+	.reduce(
+		(str, word) => str + (str.length ? " " : "") + word,
+		""); // BROWN JUMPS LAZY OVER QUICK
+						</code>
+					</pre>
+				</section>
+
+				<section>
+					<h2>Functions as Data</h2>
+					
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers>
+const filterReducer =
+	(filtered, word) => {
+		if (word.length >= 4) {
+			filtered.push(word);
+		}
+
+		return filtered;
+	};
+
+"The quick brown fox jumps over the lazy dog"
+    .split(" ")
+    .reduce(filterReducer, []);
+// [ 'quick', 'brown', 'jumps', 'over', 'lazy' ]
+						</code>
+					</pre>
+				</section>
+
+				<section>
+					<h2>Currying</h2>
+
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers>
+// Number -> Number -> Number
+const add =
+	a =>
+		b => a + b;
+
+const sum = add(5)(10); // 15
+						</code>
+					</pre>
+				</section>
+
+				<section>
+					<h2>Partial Function Application (PFA)</h2>
+
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers>
+// Number -> Number -> Number
+const add =
+	a =>
+		b => a + b;
+
+const addFive = add(5); // Number -> Number
+const sum = addFive(10); // 15
+						</code>
+					</pre>
+				</section>
+
+				<section>
+					<h3>More PFA</h3>
+
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers>
+const filterReducer =
+	predicate =>
+		(filtered, item) => {
+			if (predicate(item)) {
+				filtered.push(item);
+			}
+
+			return filtered;
+		};
+
+"The quick brown fox jumps over the lazy dog"
+	.split(" ")
+	.reduce(
+		filterReducer(w => w.length >= 4),
+		[]);						
+// [ 'quick', 'brown', 'jumps', 'over', 'lazy' ]
+
+						</code>
+					</pre>
+				</section>
+			</section>
+
+
+
 		</div>
+	</div>
 
-		<script src="dist/reveal.js"></script>
-		<script src="plugin/notes/notes.js"></script>
-		<script src="plugin/markdown/markdown.js"></script>
-		<script src="plugin/highlight/highlight.js"></script>
-		<script>
-			// More info about initialization & config:
-			// - https://revealjs.com/initialization/
-			// - https://revealjs.com/config/
-			Reveal.initialize({
-				hash: true,
+	<script src="dist/reveal.js"></script>
+	<script src="plugin/notes/notes.js"></script>
+	<script src="plugin/markdown/markdown.js"></script>
+	<script src="plugin/highlight/highlight.js"></script>
+	<script>
+		// More info about initialization & config:
+		// - https://revealjs.com/initialization/
+		// - https://revealjs.com/config/
+		Reveal.initialize({
+			hash: true,
+			navigationMode: "linear",
 
-				// Learn about plugins: https://revealjs.com/plugins/
-				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
-			});
-		</script>
-	</body>
+			// Learn about plugins: https://revealjs.com/plugins/
+			plugins: [RevealMarkdown, RevealHighlight, RevealNotes]
+		});
+	</script>
+</body>
+
 </html>
