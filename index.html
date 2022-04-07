@@ -5,7 +5,7 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-	<title>reveal.js</title>
+	<title>Functional-Flavored JavaScript</title>
 
 	<link rel="stylesheet" href="dist/reset.css">
 	<link rel="stylesheet" href="dist/reveal.css">
@@ -296,16 +296,376 @@ const filterReducer =
 		filterReducer(w => w.length >= 4),
 		[]);						
 // [ 'quick', 'brown', 'jumps', 'over', 'lazy' ]
-
 						</code>
 					</pre>
 				</section>
 			</section>
 
+			<section>
+				<section>
+					<h2>Composability</h2>
 
+					<em>Creating functions from other functions</em>
+				</section>
 
+				<section>
+					<h2>Life Before Composition</h2>
+
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers>
+// String -> String
+const reverseStringNaive =
+	str =>
+		str
+			.split("")
+			.reverse()
+			.join("");
+
+// RegExp -> String -> String
+const removeByPattern =
+	pattern =>
+		str =>
+			str
+				.replace(pattern, "");
+
+// String -> String
+const removeNonWordCharacters = removeByPattern(/\W/ig);
+const removeVowels = removeByPattern(/[AEIOU]/gi);
+						</code>
+					</pre>
+				</section>
+
+				<section>
+					<h2>Life Before Composition</h2>
+
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers>
+const input = "The quick brown fox jumps over the lazy dog";
+const upper = toUpperCase(input);
+const reversed = reverseStringNaive(upper);
+const wordChars = removeNonWordCharacters(reversed);
+const noVowels = removeVowels(wordChars); // GDYZLHTRVSPMJXFNWRBKCQHT	
+						</code>
+					</pre>
+				</section>
+
+				<section>
+					<h2>Life Before Composition</h2>
+
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers>
+const str =
+	removeVowels(
+		removeNonWordCharacters(
+			reverseStringNaive(
+				toUpperCase("The quick brown fox jumps over the lazy dog")
+			)
+		)
+	); // GDYZLHTRVSPMJXFNWRBKCQHT
+						</code>
+					</pre>
+				</section>
+
+				<section>
+					<h2>Composability</h2>
+
+					<div>Remember the reduce function?</div>
+			
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers>
+// Func<T, U>[] -> T -> U
+const compose =
+	(...functions) =>
+		value =>
+			functions
+				.reduce(
+					(result, fn) => fn(result),
+					value);
+						</code>
+					</pre>
+				</section>
+
+				<section>
+					<h2>Composability</h2>
+			
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers>
+compose(
+	toUpperCase,
+	reverseStringNaive,
+	removeNonWordCharacters,
+	removeVowels)("The quick brown fox jumps over the lazy dog"); // GDYZLHTRVSPMJXFNWRBKCQHT
+						</code>
+					</pre>
+				</section>
+
+				<section>
+					<h2>Composability</h2>
+			
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers>
+const transformString =
+	compose(
+		toUpperCase,
+		reverseStringNaive,
+		removeNonWordCharacters,
+		removeVowels);
+
+transformString("The quick brown fox jumps over the lazy dog"); // GDYZLHTRVSPMJXFNWRBKCQHT
+						</code>
+					</pre>
+				</section>
+			</section>
+
+			<section>
+				<section>
+					<h2>Pipelining</h2>
+
+					<div>Single-use composition; Generalized fluent interface</div>
+
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers>
+"The quick brown fox jumps over the lazy dog"
+    [PIPE](toUpperCase)
+    [PIPE](reverseStringNaive)
+    [PIPE](removeNonWordCharacters)
+    [PIPE](removeVowels); // GDYZLHTRVSPMJXFNWRBKCQHT
+						</code>
+					</pre>
+				</section>
+
+				<section>
+					<h2>Extending Objects</h2>
+			
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers>
+// T -> Func<T, U> -> Symbol
+const attachSymbol =
+    target =>
+        fn => {
+            const sym = Symbol();
+
+            Reflect.defineProperty(
+                target,
+                sym,
+                {
+                    enumerable: false,
+                    writable: false,
+                    configurable: false,
+                    value: fn
+                }
+            );
+
+            return sym;
+        };
+						</code>
+					</pre>
+				</section>
+			
+				<section>
+					<h2>Extending Objects</h2>
+			
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers>
+const attachSymbolToObjectPrototype =
+	attachSymbol(Object.prototype);
+
+const PIPE =
+    attachSymbolToObjectPrototype(
+        function (fn) {
+            return fn(this);
+        });
+
+"The quick brown fox jumps over the lazy dog"
+    [PIPE](toUpperCase)
+    [PIPE](reverseStringNaive)
+    [PIPE](removeNonWordCharacters)
+    [PIPE](removeVowels); // GDYZLHTRVSPMJXFNWRBKCQHT
+						</code>
+					</pre>
+				</section>
+
+			</section>
+
+			<section>
+				<section>
+					<h2>Bringing it Together</h2>
+					<h3>Semi-practical Example</h3>
+				</section>
+
+				<section>
+					<h2>Model-based Validation</h2>
+			
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers>
+const validateModel =
+    validationModel =>
+        dataModel => {
+            const invalidProperties =
+                validationModel
+                    [PIPE](Reflect.ownKeys)
+                    .reduce(
+                        (failures, key) => {
+                            const validate = validationModel[key];
+                            const value = dataModel[key];
+
+                            if (!validate(value)) {
+                                failures.push(key);
+                            }
+
+                            return failures;
+                        },
+                        [])
+                        .join(", ");
+
+                if (invalidProperties.length > 0) {
+                    throw new Error(`Validation failed for: ${invalidProperties}`);
+                }
+
+                return dataModel;
+            };
+						</code>
+					</pre>
+				</section>
+
+				<section>
+					<h2>Validation Functions</h2>
+			
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers>
+const isString =
+    value =>
+        typeof value === "string";
+
+const isNotEmptyString =
+    value =>
+        isString(value) && value.trim().length > 0;
+        
+const isNumber =
+    value =>
+        typeof value === "number" && !isNaN(value);
+        
+const matchesPattern =
+    pattern =>
+        value =>
+            isString(value) && value.match(pattern);
+
+const validateMusicModel =
+    validateModel({
+        name: isNotEmptyString,
+        album: isNotEmptyString,
+        duration: matchesPattern(/^\d{2}:\d{2}$/),
+        releaseYear: isNumber,
+    });
+						</code>
+					</pre>
+				</section>
+			
+				<section>
+					<h2>Model-based Transformation</h2>
+			
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers>
+const transformModel =
+    transformationModel =>
+        dataModel =>
+            transformationModel
+                [PIPE](Reflect.ownKeys)
+                .reduce(
+                    (newModel, key) => {
+                        const transform = transformationModel[key];
+                        const value = dataModel[key];
+
+                        return newModel[ATTACH_IMMUTABLE_PROPERTY](
+                            key,
+                            value ? transform(value) : value);
+                    },
+                    {});
+						</code>
+					</pre>
+				</section>
+
+				<section>
+					<h2>Transformation Functions</h2>
+
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers>
+const ID =
+    value => value;
+
+const trimString =
+    value => value.trim();
+
+const convertDurationToSeconds =
+    value =>
+        ({
+            .../^(?<minutes>\d{2}):(?<seconds>\d{2})$/
+                .exec(value)
+                .groups
+        })
+        [PIPE](
+            ({ minutes, seconds }) =>
+                (parseInt(minutes, 10) * 60) + parseInt(seconds));
+
+const transformMusicModel =
+    transformModel({
+        name: trimString,
+        album: trimString,
+        duration: convertDurationToSeconds,
+        releaseYear: ID
+    });
+						</code>
+					</pre>
+				</section>
+
+				<section>
+					<h2>Building the Pipeline</h2>
+			
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers>
+const toJson =
+    value => JSON.stringify(value, null, 2);
+
+const writeToLog =
+    value => console.info(value.toString());
+
+({
+    name: "\t\tNever Gonna Give You Up   ",
+    album: "Whenever You Need Somebody",
+    duration: "03:33",
+    releaseYear: 1987,
+})
+    [PIPE](validateMusicModel)
+    [PIPE](transformMusicModel)
+    [PIPE](toJson)
+    [PIPE](writeToLog);
+
+/*
+{ 
+  "name": "Never Gonna Give You Up", 
+  "album": "Whenever You Need Somebody", 
+  "duration": 213, 
+  "releaseYear": 1987 
+} 
+*/
+						</code>
+					</pre>
+				</section>
+			
+			</section>
 		</div>
 	</div>
+
+<!--
+	<section>
+		<h2></h2>
+
+		<pre>
+			<code class="javascript" data-trim data-noescape data-line-numbers>
+			</code>
+		</pre>
+	</section>
+-->
 
 	<script src="dist/reveal.js"></script>
 	<script src="plugin/notes/notes.js"></script>
