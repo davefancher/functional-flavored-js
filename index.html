@@ -298,8 +298,8 @@ const filterReducer =
 					<pre class="fragment">
 						<code class="javascript" data-trim data-noescape data-line-numbers>
 "The quick brown fox jumps over the lazy dog"
-    .split(" ")
-    .reduce(filterReducer, []);
+  .split(" ")
+  .reduce(filterReducer, []);
 // [ 'quick', 'brown', 'jumps', 'over', 'lazy' ]
 						</code>
 					</pre>
@@ -509,10 +509,10 @@ transformString("The quick brown fox jumps over the lazy dog");
 					<pre>
 						<code class="javascript" data-trim data-noescape data-line-numbers="2-5">
 "The quick brown fox jumps over the lazy dog"
-    [PIPE](toUpperCase)
-    [PIPE](reverseStringNaive)
-    [PIPE](removeNonWordCharacters)
-    [PIPE](removeVowels);
+  [PIPE](toUpperCase)
+  [PIPE](reverseStringNaive)
+  [PIPE](removeNonWordCharacters)
+  [PIPE](removeVowels);
 // GDYZLHTRVSPMJXFNWRBKCQHT
 						</code>
 					</pre>
@@ -527,23 +527,23 @@ transformString("The quick brown fox jumps over the lazy dog");
 						<code class="javascript" data-trim data-noescape data-line-numbers>
 // T -> Func<T, U> -> Symbol
 const attachSymbol =
-    target =>
-        fn => {
-            const sym = Symbol();
+  target =>
+    fn => {
+      const sym = Symbol();
 
-            Reflect.defineProperty(
-                target,
-                sym,
-                {
-                    enumerable: false,
-                    writable: false,
-                    configurable: false,
-                    value: fn
-                }
-            );
+      Reflect.defineProperty(
+        target,
+        sym,
+        {
+          enumerable: false,
+          writable: false,
+          configurable: false,
+          value: fn
+        }
+      );
 
-            return sym;
-        };
+      return sym;
+    };
 						</code>
 					</pre>
 				</section>
@@ -557,16 +557,16 @@ const attachSymbolToObjectPrototype =
 	attachSymbol(Object.prototype);
 
 const PIPE =
-    attachSymbolToObjectPrototype(
-        function (fn) {
-            return fn(this);
-        });
+  attachSymbolToObjectPrototype(
+    function (fn) {
+      return fn(this);
+    });
 
 "The quick brown fox jumps over the lazy dog"
-    [PIPE](toUpperCase)
-    [PIPE](reverseStringNaive)
-    [PIPE](removeNonWordCharacters)
-    [PIPE](removeVowels); // GDYZLHTRVSPMJXFNWRBKCQHT
+  [PIPE](toUpperCase)
+  [PIPE](reverseStringNaive)
+  [PIPE](removeNonWordCharacters)
+  [PIPE](removeVowels); // GDYZLHTRVSPMJXFNWRBKCQHT
 						</code>
 					</pre>
 				</section>
@@ -585,31 +585,32 @@ const PIPE =
 					<pre>
 						<code class="javascript" data-trim data-noescape data-line-numbers>
 const validateModel =
-    validationModel =>
-        dataModel => {
-            const invalidProperties =
-                validationModel
-                    [PIPE](Reflect.ownKeys)
-                    .reduce(
-                        (failures, key) => {
-                            const validate = validationModel[key];
-                            const value = dataModel[key];
+  validationModel =>
+    dataModel => {
+      const invalidProperties =
+        validationModel
+          [PIPE](Reflect.ownKeys)
+          .reduce(
+            (failures, key) => {
+              const validate = validationModel[key];
+              const value = dataModel[key];
 
-                            if (!validate(value)) {
-                                failures.push(key);
-                            }
+              if (!validate(value)) {
+                failures.push(key);
+              }
 
-                            return failures;
-                        },
-                        [])
-                        .join(", ");
+              return failures;
+            },
+            [])
+            .join(", ");
 
-                if (invalidProperties.length > 0) {
-                    throw new Error(`Validation failed for: ${invalidProperties}`);
-                }
+        if (invalidProperties.length > 0) {
+          const msg = `Validation failed: ${invalidProperties}`;
+          throw new Error(msg);
+        }
 
-                return dataModel;
-            };
+        return dataModel;
+      };
 						</code>
 					</pre>
 				</section>
@@ -620,29 +621,23 @@ const validateModel =
 					<pre>
 						<code class="javascript" data-trim data-noescape data-line-numbers>
 const isString =
-    value =>
-        typeof value === "string";
+  value =>
+    typeof value === "string";
 
 const isNotEmptyOrWhitespace =
-    value =>
-        isString(value) && value.length > 0 && !/^\s*\S.*$/.test(value);
+  value =>
+    isString(value)
+			&& value.length > 0
+			&& !/^\s*\S.*$/.test(value);
 			
 const isNumber =
-    value =>
-        typeof value === "number" && !isNaN(value);
-        
+  value =>
+    typeof value === "number" && !isNaN(value);
+    
 const matchesPattern =
-    pattern =>
-        value =>
-            isString(value) && value.match(pattern);
-
-const validateMusicModel =
-    validateModel({
-        name: isNotEmptyOrWhitespace,
-        album: isNotEmptyOrWhitespace,
-        duration: matchesPattern(/^\d{2}:\d{2}$/),
-        releaseYear: isNumber,
-    });
+  pattern =>
+    value =>
+      isString(value) && value.match(pattern);
 						</code>
 					</pre>
 				</section>
@@ -653,20 +648,20 @@ const validateMusicModel =
 					<pre>
 						<code class="javascript" data-trim data-noescape data-line-numbers>
 const transformModel =
-    transformationModel =>
-        dataModel =>
-            transformationModel
-                [PIPE](Reflect.ownKeys)
-                .reduce(
-                    (newModel, key) => {
-                        const transform = transformationModel[key];
-                        const value = dataModel[key];
+  transformationModel =>
+    dataModel =>
+      transformationModel
+        [PIPE](Reflect.ownKeys)
+        .reduce(
+          (newModel, key) => {
+            const transform = transformationModel[key];
+            const value = dataModel[key];
 
-                        return newModel[ATTACH_IMMUTABLE_PROPERTY](
-                            key,
-                            value ? transform(value) : value);
-                    },
-                    {});
+            return newModel[ATTACH_IMMUTABLE_PROPERTY](
+              key,
+              value ? transform(value) : value);
+          },
+          {});
 						</code>
 					</pre>
 				</section>
@@ -677,29 +672,21 @@ const transformModel =
 					<pre>
 						<code class="javascript" data-trim data-noescape data-line-numbers>
 const ID =
-    value => value;
+  value => value;
 
 const trimString =
-    value => value.trim();
+  value => value.trim();
 
 const convertDurationToSeconds =
-    value =>
-        ({
-            .../^(?<minutes>\d{2}):(?<seconds>\d{2})$/
-                .exec(value)
-                .groups
-        })
-        [PIPE](
-            ({ minutes, seconds }) =>
-                (parseInt(minutes, 10) * 60) + parseInt(seconds));
-
-const transformMusicModel =
-    transformModel({
-        name: trimString,
-        album: trimString,
-        duration: convertDurationToSeconds,
-        releaseYear: ID
-    });
+  value =>
+    ({
+      .../^(?<minutes>\d{2}):(?<seconds>\d{2})$/
+        .exec(value)
+        .groups
+    })
+    [PIPE](
+      ({ minutes, seconds }) =>
+        (parseInt(minutes, 10) * 60) + parseInt(seconds));
 						</code>
 					</pre>
 				</section>
@@ -709,22 +696,32 @@ const transformMusicModel =
 			
 					<pre>
 						<code class="javascript" data-trim data-noescape data-line-numbers>
-const toJson =
-    value => JSON.stringify(value, null, 2);
+const validateMusicModel =
+  validateModel({
+    name: isNotEmptyOrWhitespace,
+    album: isNotEmptyOrWhitespace,
+    duration: matchesPattern(/^\d{2}:\d{2}$/),
+    releaseYear: isNumber,
+  });
 
-const writeToLog =
-    value => console.info(value.toString());
+const transformMusicModel =
+  transformModel({
+    name: trimString,
+    album: trimString,
+    duration: convertDurationToSeconds,
+    releaseYear: ID
+  });
 
 ({
-    name: "\t\tNever Gonna Give You Up   ",
-    album: "Whenever You Need Somebody",
-    duration: "03:33",
-    releaseYear: 1987,
+  name: "\t\tNever Gonna Give You Up   ",
+  album: "Whenever You Need Somebody",
+  duration: "03:33",
+  releaseYear: 1987,
 })
-    [PIPE](validateMusicModel)
-    [PIPE](transformMusicModel)
-    [PIPE](toJson)
-    [PIPE](writeToLog);
+  [PIPE](validateMusicModel)
+  [PIPE](transformMusicModel)
+  [PIPE](value => JSON.stringify(value, null, 2))
+  [PIPE](value => console.info(value));
 
 /*
 { 
@@ -737,7 +734,12 @@ const writeToLog =
 						</code>
 					</pre>
 				</section>
-			
+			</section>
+
+			<section>
+				<h2>Functional-Flavored JavaScript</h2>
+				<div><img src="./qr-code.png" width="250"></div>
+				<div><img src="./Signature-BW.png" height="150"></div>
 			</section>
 		</div>
 	</div>
