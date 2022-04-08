@@ -31,46 +31,59 @@
 					<li>Node.js-centric</li>
 					<li>Current project built with these techniques</li>
 				</ul>
+
+				<aside class="notes">
+					<ul>
+						<li>Programming for ~20 years</li>
+						<li>
+							Traditionally in MS technologies
+							<ul>
+								<li>Mostly .NET</li>
+								<li>C#</li>
+								<li>F#</li>
+							</ul>
+						</li>
+						<li>JS for the past ~4 years</li>
+						<li>Node.js</li>
+					</ul>
+				</aside>
 			</section>
 
 			<section>
 				<h2>Tenets of Functional Programming</h2>
 
 				<ol>
-					<li>Purity/controlling side-effects</li>
-					<li>Favor expressions over statements</li>
-					<li>Functions as data</li>
+					<li class="fragment">Purity/controlling side-effects</li>
+					<li class="fragment">Favor expressions over statements</li>
+					<li class="fragment">Functions as data</li>
 				</ol>
+
+				<aside class="notes">
+					<ul>
+						<li>Eliminating side-effects is a lofty goal but software needs to do something</li>
+						<li>Statements perform an action, expressions return a value</li>
+						<li>Functions should be treated no differently than numbers, objects, strings, or anything else</li>
+						<li>
+							Separate data from behavior
+							<ul>
+								<li>A method is a function with implied context</li>
+								<li>Functions should be given what they need to do their job</li>
+								<li>Explicitly pass in anything the function needs to make dependencies obvious</li>
+								<li>Acting upon implied context encourages side-effects</li>
+								<li>Providing all necessary input encourages composition</li>
+							</ul>
+						</li>
+						<li>
+							Limit side-effects to narrow scopes
+							<ul>
+								<li>Sometimes modifying values in-place is preferable to copying</li>
+							</ul>
+						</li>
+					</ul>
+				</aside>
 			</section>
 
 			<section>
-				<section>
-					<h2>Purity/controlling side-effects</h2>
-
-					<aside class="notes">
-						<ul>
-							<li>Programs need to do something</li>
-							<li>Prefer immutability where possible</li>
-							<li>
-								Separate data from behavior
-								<ul>
-									<li>A method is a function with implied context</li>
-									<li>Functions should be given what they need to do their job</li>
-									<li>Explicitly pass in anything the function needs to make dependencies obvious</li>
-									<li>Acting upon implied context encourages side-effects</li>
-									<li>Providing all necessary input encourages composition</li>
-								</ul>
-							</li>
-							<li>
-								Limit side-effects to narrow scopes
-								<ul>
-									<li>Sometimes modifying values in-place is preferable to copying</li>
-								</ul>
-							</li>
-						</ul>
-					</aside>
-				</section>
-
 				<section>
 					<h2>Immutability - Object.freeze</h3>
 
@@ -85,10 +98,11 @@ const song = Object.freeze({
 	genre: [ "pop", "soul" ]
 });
 
-// Often silently fails unless in strict mode
+// Silently fails unless in strict mode
 song.name = "NEVER GONNA GIVE YOU UP"; 
 
-// Pushes "dance" into the genre array unless the array is also frozen
+// Pushes "dance" into the genre array unless the array
+// is also frozen
 song.genre.push("dance");
 						</code>
 					</pre>
@@ -110,6 +124,7 @@ Reflect.defineProperty(
 		writable: false
 	});
 
+// Silently fails unless in strict mode
 song.name = "NEVER GONNA GIVE YOU UP";
 						</code>
 					</pre>
@@ -121,11 +136,11 @@ song.name = "NEVER GONNA GIVE YOU UP";
 					<h2>Arrow Functions</h2>
 
 					<ul>
-						<li>Not just shorthand for classic functions</li>
-						<li>The limitations are generally <em>good</em> for functional-flavored JS</li>
-						<li>Bodied or implicit returns</li>
-						<li>Encourage composition</li>
-						<li>Can still close around values</li>
+						<li class="fragment">Not just shorthand for classic functions</li>
+						<li class="fragment">The limitations are generally <em>good</em> for functional-flavored JS</li>
+						<li class="fragment">Bodied or implicit returns</li>
+						<li class="fragment">Encourage composition</li>
+						<li class="fragment">Can still close around values</li>
 					</ul>
 				</section>
 
@@ -149,9 +164,8 @@ toLowerCase("CODESTOCK"); // codestock
 					<h2>Functions as Data - Array Methods</h2>
 
 					<ul>
-						<li>Perhaps the most obvious/readily available case</li>
-						<li>Naturally composable through a fluent interface</li>
-						<li>
+						<li class="fragment">Perhaps the most obvious/readily available case</li>
+						<li class="fragment">
 							Examples:
 							<ul>
 								<li>filter</li>
@@ -160,14 +174,19 @@ toLowerCase("CODESTOCK"); // codestock
 								<li>join</li>
 							</ul>
 						</li>
+						<li class="fragment">Naturally composable through a fluent interface</li>
 					</ul>
+
+					<aside class="notes">
+						These methods and their other siblings form a fluent interface which is a form of composition
+					</aside>
 				</section>
 
 				<section>
-					<h2>Array Methods - Example</h2>
+					<h2>Array Methods</h2>
 
 					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers>
+						<code class="javascript" data-trim data-noescape data-line-numbers="3-6">
 "The quick brown fox jumps over the lazy dog"
 	.split(" ")
 	.filter(w => w.length >= 4)
@@ -179,53 +198,91 @@ toLowerCase("CODESTOCK"); // codestock
 				</section>
 
 				<section>
-					<h2>One Function to Rule Them All</h2>
+					<h2>Reduce</h2>
+					<h3>One Function to Rule Them All</h3>
+				</section>
+
+				<section>
+					<h2>Reduce: Filtering</h2>
 
 					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers>
-"The quick brown fox jumps over the lazy dog"
-	.split(" ")
-	// Filter
-	.reduce(
-		(filtered, word) => {
-			if (word.length >= 4) {
-				filtered.push(word);
-			}
+						<code class="javascript" data-trim data-noescape data-line-numbers="3-9">
+// ...
+.reduce(
+	(filtered, word) => {
+		if (word.length >= 4) {
+			filtered.push(word);
+		}
 
-			return filtered;
-		},
-		[])
-	// Sort
-	.reduce(
-		(sorted, word) => {
-			const nextIndex =
-				sorted.findIndex(w => word.localeCompare(w) < 0);
-			sorted.splice(nextIndex, 0, word);
-
-			return sorted;
-		},
-		[])
-	// Map
-	.reduce(
-		(words, word) => {
-			const ucWord = toUpperCase(word)
-			words.push(ucWord);
-
-			return words;
-		},
-		[])
-	// Join
-	.reduce(
-		(str, word) => str + (str.length ? " " : "") + word,
-		""); // BROWN JUMPS LAZY OVER QUICK
+		return filtered;
+	},
+	[])
+// ...
 						</code>
 					</pre>
 				</section>
 
 				<section>
+					<h2>Reduce: Sorting</h2>
+
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers="3-9">
+// ...
+.reduce(
+	(sorted, word) => {
+		const nextIndex =
+			sorted.findIndex(w => word.localeCompare(w) < 0);
+		sorted.splice(nextIndex, 0, word);
+
+		return sorted;
+	},
+	[])
+// ...
+						</code>
+					</pre>
+				</section>
+
+				<section>
+					<h2>Reduce: Mapping</h2>
+
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers="3-8">
+// ...
+.reduce(
+	(words, word) => {
+		const ucWord = toUpperCase(word)
+		words.push(ucWord);
+
+		return words;
+	},
+	[])
+// ...
+						</code>
+					</pre>
+				</section>
+
+				<section>
+					<h2>Reduce: Joining</h2>
+
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers="3">
+// ...
+.reduce(
+	(str, word) => str + (str.length ? " " : "") + word,
+	"");
+// ...
+						</code>
+					</pre>
+
+					<aside class="notes">
+						Notice here that our initial value is a string rather than an array
+					</aside>
+				</section>
+
+				<section>
 					<h2>Functions as Data</h2>
 					
-					<pre>
+					<pre class="fragment">
 						<code class="javascript" data-trim data-noescape data-line-numbers>
 const filterReducer =
 	(filtered, word) => {
@@ -235,7 +292,11 @@ const filterReducer =
 
 		return filtered;
 	};
+						</code>
+					</pre>
 
+					<pre class="fragment">
+						<code class="javascript" data-trim data-noescape data-line-numbers>
 "The quick brown fox jumps over the lazy dog"
     .split(" ")
     .reduce(filterReducer, []);
@@ -247,7 +308,17 @@ const filterReducer =
 				<section>
 					<h2>Currying</h2>
 
-					<pre>
+					<pre class="fragment">
+						<code class="javascript" data-trim data-noescape data-line-numbers>
+// (Number, Number) -> Number
+const add =
+	(a, b) => a + b;
+
+const sum = add(5, 10); // 15
+						</code>
+					</pre>
+
+					<pre class="fragment">
 						<code class="javascript" data-trim data-noescape data-line-numbers>
 // Number -> Number -> Number
 const add =
@@ -262,13 +333,17 @@ const sum = add(5)(10); // 15
 				<section>
 					<h2>Partial Function Application (PFA)</h2>
 
-					<pre>
+					<pre class="fragment">
 						<code class="javascript" data-trim data-noescape data-line-numbers>
 // Number -> Number -> Number
 const add =
 	a =>
 		b => a + b;
+	</code>
+</pre>
 
+<pre class="fragment">
+	<code class="javascript" data-trim data-noescape data-line-numbers>
 const addFive = add(5); // Number -> Number
 const sum = addFive(10); // 15
 						</code>
@@ -289,7 +364,11 @@ const filterReducer =
 
 			return filtered;
 		};
+						</code>
+					</pre>
 
+					<pre class="fragment">
+						<code class="javascript" data-trim data-noescape data-line-numbers>
 "The quick brown fox jumps over the lazy dog"
 	.split(" ")
 	.reduce(
@@ -344,7 +423,8 @@ const input = "The quick brown fox jumps over the lazy dog";
 const upper = toUpperCase(input);
 const reversed = reverseStringNaive(upper);
 const wordChars = removeNonWordCharacters(reversed);
-const noVowels = removeVowels(wordChars); // GDYZLHTRVSPMJXFNWRBKCQHT	
+const noVowels = removeVowels(wordChars);
+// GDYZLHTRVSPMJXFNWRBKCQHT	
 						</code>
 					</pre>
 				</section>
@@ -394,7 +474,8 @@ compose(
 	toUpperCase,
 	reverseStringNaive,
 	removeNonWordCharacters,
-	removeVowels)("The quick brown fox jumps over the lazy dog"); // GDYZLHTRVSPMJXFNWRBKCQHT
+	removeVowels)("The quick brown fox jumps over the lazy dog");
+// GDYZLHTRVSPMJXFNWRBKCQHT
 						</code>
 					</pre>
 				</section>
@@ -411,7 +492,8 @@ const transformString =
 		removeNonWordCharacters,
 		removeVowels);
 
-transformString("The quick brown fox jumps over the lazy dog"); // GDYZLHTRVSPMJXFNWRBKCQHT
+transformString("The quick brown fox jumps over the lazy dog");
+// GDYZLHTRVSPMJXFNWRBKCQHT
 						</code>
 					</pre>
 				</section>
@@ -421,17 +503,21 @@ transformString("The quick brown fox jumps over the lazy dog"); // GDYZLHTRVSPMJ
 				<section>
 					<h2>Pipelining</h2>
 
-					<div>Single-use composition; Generalized fluent interface</div>
+					<div>Single-use composition</div>
+					<div>Generalized fluent interface</div>
 
 					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers>
+						<code class="javascript" data-trim data-noescape data-line-numbers="2-5">
 "The quick brown fox jumps over the lazy dog"
     [PIPE](toUpperCase)
     [PIPE](reverseStringNaive)
     [PIPE](removeNonWordCharacters)
-    [PIPE](removeVowels); // GDYZLHTRVSPMJXFNWRBKCQHT
+    [PIPE](removeVowels);
+// GDYZLHTRVSPMJXFNWRBKCQHT
 						</code>
 					</pre>
+
+					<aside class="notes">There is currently a stage 2 proposal for adding a pipe operator to JavaScript</aside>
 				</section>
 
 				<section>
@@ -537,10 +623,10 @@ const isString =
     value =>
         typeof value === "string";
 
-const isNotEmptyString =
+const isNotEmptyOrWhitespace =
     value =>
-        isString(value) && value.trim().length > 0;
-        
+        isString(value) && value.length > 0 && !/^\s*\S.*$/.test(value);
+			
 const isNumber =
     value =>
         typeof value === "number" && !isNaN(value);
@@ -552,8 +638,8 @@ const matchesPattern =
 
 const validateMusicModel =
     validateModel({
-        name: isNotEmptyString,
-        album: isNotEmptyString,
+        name: isNotEmptyOrWhitespace,
+        album: isNotEmptyOrWhitespace,
         duration: matchesPattern(/^\d{2}:\d{2}$/),
         releaseYear: isNumber,
     });
