@@ -24,6 +24,10 @@
 				<h3>Dave Fancher</h3>
 			</section>
 
+			<!-- <section>
+				<img src="./assets/sponsors.png" />
+			</section> -->
+
 			<section>
 				<h2>About This Presentation</h2>
 				<ul>
@@ -88,22 +92,22 @@
 					<h2>Immutability - Object.freeze</h3>
 
 					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers="1-8">
-const song = Object.freeze({
-	name: "Never Gonna Give You Up",
-	artist: "Rick Astley",
-	album: "Whenever You Need Somebody",
-	year: 1987,
-	duration: "03:30",
-	genre: [ "pop", "soul" ]
-});
+						<code class="javascript" data-trim data-noescape data-line-numbers="1-15|1|10-11|13-15">
+							const song = Object.freeze({
+								name: "Never Gonna Give You Up",
+								artist: "Rick Astley",
+								album: "Whenever You Need Somebody",
+								year: 1987,
+								duration: "03:30",
+								genre: [ "pop", "soul" ]
+							});
 
-// Silently fails unless in strict mode
-song.name = "NEVER GONNA GIVE YOU UP"; 
+							// Silently fails unless in strict mode
+							song.name = "NEVER GONNA GIVE YOU UP"; 
 
-// Pushes "dance" into the genre array unless the array
-// is also frozen
-song.genre.push("dance");
+							// Pushes "dance" into the genre array unless the array
+							// is also frozen
+							song.genre.push("dance");
 						</code>
 					</pre>
 				</section>
@@ -112,23 +116,27 @@ song.genre.push("dance");
 					<h2>Immutability - defineProperty</h2>
 
 					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers="3-9">
-const song = {};
+						<code class="javascript" data-trim data-noescape data-line-numbers="3-9|9|12-13">
+							const song = {};
 
-Reflect.defineProperty(
-	song,
-	"name",
-	{
-		value: "Never Gonna Give You Up",
-		enumerable: true,
-		writable: false
-	});
+							Reflect.defineProperty(
+								song,
+								"name",
+								{
+									value: "Never Gonna Give You Up",
+									enumerable: true,
+									writable: false
+								});
 
-// Silently fails unless in strict mode
-song.name = "NEVER GONNA GIVE YOU UP";
+							// Silently fails unless in strict mode
+							song.name = "NEVER GONNA GIVE YOU UP";
 						</code>
 					</pre>
 				</section>
+
+				<aside class="notes">
+					Object has a similar function with the same name. I'm using the more modern Reflect API here.
+				</aside>
 			</section>
 
 			<section>
@@ -142,20 +150,31 @@ song.name = "NEVER GONNA GIVE YOU UP";
 						<li class="fragment">Encourage composition</li>
 						<li class="fragment">Can still close around values</li>
 					</ul>
+
+					<aside class="notes">
+						No this, no arguments, etc...
+					</aside>
 				</section>
 
 				<section>
 					<h2>Arrow Functions - Basic Examples</h2>
 
 					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers>
-const toUpperCase = x => x.toUpperCase();
-const toLowerCase = x => x.toLowerCase();
+						<code class="javascript" data-trim data-noescape data-line-numbers="1-8|1-2|4-5|7-8">
+							const identity = x => x;
+							identity("Beer City Code");    // Beer City Code
 
-toUpperCase("beer city code"); // BEER CITY CODE
-toLowerCase("BEER CITY CODE"); // beer city code
+							const toUpperCase = x => x.toUpperCase();
+							toUpperCase("Beer City Code"); // BEER CITY CODE
+
+							const toLowerCase = x => x.toLowerCase();
+							toLowerCase("BEER CITY CODE"); // beer city code
 						</code>
 					</pre>
+
+					<aside class="notes">
+						These examples aren't as contrived as one might think. We'll see similar functions used practically in examples later.
+					</aside>
 				</section>
 			</section>
 
@@ -186,13 +205,15 @@ toLowerCase("BEER CITY CODE"); // beer city code
 					<h2>Array Methods</h2>
 
 					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers="3-6">
-"The quick brown fox jumps over the lazy dog"
-	.split(" ")
-	.filter(w => w.length >= 4)
-	.sort()
-	.map(toUpperCase)
-	.join(" "); // BROWN JUMPS LAZY OVER QUICK
+						<code class="javascript" data-trim data-noescape data-line-numbers="1-8|5,7">
+							const toLowerCase = x => x.toLowerCase();
+
+							"The quick brown fox jumps over the lazy dog"
+								.split(" ")
+								.filter(w => w.length >= 4)
+								.sort()
+								.map(toUpperCase)
+								.join(" "); // BROWN JUMPS LAZY OVER QUICK
 						</code>
 					</pre>
 				</section>
@@ -206,18 +227,18 @@ toLowerCase("BEER CITY CODE"); // beer city code
 					<h2>Reduce: Filtering</h2>
 
 					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers="3-9">
-// ...
-.reduce(
-	(filtered, word) => {
-		if (word.length >= 4) {
-			filtered.push(word);
-		}
+						<code class="javascript" data-trim data-noescape data-line-numbers="2-10|3-9|10|4-8">
+							// ...
+							.reduce(
+								(filtered, word) => {
+									if (word.length >= 4) {
+										filtered.push(word);
+									}
 
-		return filtered;
-	},
-	[])
-// ...
+									return filtered;
+								},
+								[])
+							// ...
 						</code>
 					</pre>
 				</section>
@@ -226,18 +247,19 @@ toLowerCase("BEER CITY CODE"); // beer city code
 					<h2>Reduce: Sorting</h2>
 
 					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers="3-9">
-// ...
-.reduce(
-	(sorted, word) => {
-		const nextIndex =
-			sorted.findIndex(w => word.localeCompare(w) < 0);
-		sorted.splice(nextIndex, 0, word);
+						<code class="javascript" data-trim data-noescape data-line-numbers="2-11|3-9|4-9">
+							// ...
+							.reduce(
+								(sorted, word) => {
+									const nextIndex =
+										sorted.findIndex(w => word.localeCompare(w) < 0);
 
-		return sorted;
-	},
-	[])
-// ...
+									sorted.splice(nextIndex, 0, word);
+
+									return sorted;
+								},
+								[])
+							// ...
 						</code>
 					</pre>
 				</section>
@@ -246,17 +268,17 @@ toLowerCase("BEER CITY CODE"); // beer city code
 					<h2>Reduce: Mapping</h2>
 
 					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers="3-8">
-// ...
-.reduce(
-	(words, word) => {
-		const ucWord = toUpperCase(word)
-		words.push(ucWord);
+						<code class="javascript" data-trim data-noescape data-line-numbers="2-9|4-7">
+							// ...
+							.reduce(
+								(words, word) => {
+									const ucWord = toUpperCase(word)
+									words.push(ucWord);
 
-		return words;
-	},
-	[])
-// ...
+									return words;
+								},
+								[])
+							// ...
 						</code>
 					</pre>
 				</section>
@@ -265,12 +287,12 @@ toLowerCase("BEER CITY CODE"); // beer city code
 					<h2>Reduce: Joining</h2>
 
 					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers="3">
-// ...
-.reduce(
-	(str, word) => str + (str.length ? " " : "") + word,
-	"");
-// ...
+						<code class="javascript" data-trim data-noescape data-line-numbers="2-4|4|3">
+							// ...
+							.reduce(
+								(str, word) => str + (str.length ? " " : "") + word,
+								"");
+							// ...
 						</code>
 					</pre>
 
@@ -284,23 +306,23 @@ toLowerCase("BEER CITY CODE"); // beer city code
 					
 					<pre class="fragment">
 						<code class="javascript" data-trim data-noescape data-line-numbers>
-const filterReducer =
-	(filtered, word) => {
-		if (word.length >= 4) {
-			filtered.push(word);
-		}
+						const filterReducer =
+							(filtered, word) => {
+								if (word.length >= 4) {
+									filtered.push(word);
+								}
 
-		return filtered;
-	};
+								return filtered;
+							};
 						</code>
 					</pre>
 
 					<pre class="fragment">
-						<code class="javascript" data-trim data-noescape data-line-numbers>
-"The quick brown fox jumps over the lazy dog"
-  .split(" ")
-  .reduce(filterReducer, []);
-// [ 'quick', 'brown', 'jumps', 'over', 'lazy' ]
+						<code class="javascript" data-trim data-noescape data-line-numbers="3">
+						"The quick brown fox jumps over the lazy dog"
+							.split(" ")
+							.reduce(filterReducer, []);
+							// [ 'quick', 'brown', 'jumps', 'over', 'lazy' ]
 						</code>
 					</pre>
 				</section>
@@ -308,26 +330,31 @@ const filterReducer =
 				<section>
 					<h2>Currying</h2>
 
-					<pre class="fragment">
-						<code class="javascript" data-trim data-noescape data-line-numbers>
-// (Number, Number) -> Number
-const add =
-	(a, b) => a + b;
+					<p style="text-align: left;">Classic</p>
+					<pre>
+						<code class="javascript" data-trim data-noescape data-line-numbers="2-5|3|1|5">
+							// (Number, Number) -> Number
+							const add =
+								(a, b) => a + b;
 
-const sum = add(5, 10); // 15
+							const sum = add(5, 10); // 15
 						</code>
 					</pre>
 
-					<pre class="fragment">
-						<code class="javascript" data-trim data-noescape data-line-numbers>
-// Number -> Number -> Number
-const add =
-	a =>
-		b => a + b;
+					<span class="fragment">
+						<p style="text-align: left;">Curried</p>
+						<pre>
+							<code class="javascript" data-trim data-noescape data-line-numbers="1-7|3|4|5|3-5|1|7">
+								// Number -> Number -> Number
+								const add =
+									a =>
+										b =>
+											a + b;
 
-const sum = add(5)(10); // 15
-						</code>
-					</pre>
+								const sum = add(5)(10); // 15
+							</code>
+						</pre>
+					</span>
 				</section>
 
 				<section>
@@ -335,243 +362,245 @@ const sum = add(5)(10); // 15
 
 					<pre class="fragment">
 						<code class="javascript" data-trim data-noescape data-line-numbers>
-// Number -> Number -> Number
-const add =
-	a =>
-		b => a + b;
-	</code>
-</pre>
+							// Number -> Number -> Number
+							const add =
+								a =>
+									b => a + b;
+								</code>
+							</pre>
 
-<pre class="fragment">
-	<code class="javascript" data-trim data-noescape data-line-numbers>
-const addFive = add(5); // Number -> Number
-const sum = addFive(10); // 15
-						</code>
-					</pre>
-				</section>
+							<pre class="fragment">
+								<code class="javascript" data-trim data-noescape data-line-numbers="1-2|1|2">
+									const addFive = add(5); // Number -> Number
+									const sum = addFive(10); // 15
+								</code>
+							</pre>
+						</section>
 
-				<section>
-					<h3>More PFA</h3>
+						<section>
+							<h3>More PFA</h3>
 
-					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers>
-const filterReducer =
-	predicate =>
-		(filtered, item) => {
-			if (predicate(item)) {
-				filtered.push(item);
-			}
+							<pre>
+								<code class="javascript" data-trim data-noescape data-line-numbers="">
+									const filterReducer =
+										predicate =>
+											(filtered, item) => {
+												if (predicate(item)) {
+													filtered.push(item);
+												}
 
-			return filtered;
-		};
-						</code>
-					</pre>
+												return filtered;
+											};
+								</code>
+							</pre>
 
-					<pre class="fragment">
-						<code class="javascript" data-trim data-noescape data-line-numbers>
-"The quick brown fox jumps over the lazy dog"
-	.split(" ")
-	.reduce(
-		filterReducer(w => w.length >= 4),
-		[]);						
-// [ 'quick', 'brown', 'jumps', 'over', 'lazy' ]
-						</code>
-					</pre>
-				</section>
-			</section>
+							<pre class="fragment">
+								<code class="javascript" data-trim data-noescape data-line-numbers="4">
+									"The quick brown fox jumps over the lazy dog"
+										.split(" ")
+										.reduce(
+											filterReducer(w => w.length >= 4),
+											[]);						
+										// [ 'quick', 'brown', 'jumps', 'over', 'lazy' ]
+								</code>
+							</pre>
+						</section>
+					</section>
 
-			<section>
-				<section>
-					<h2>Composability</h2>
+					<section>
+						<section>
+							<h2>Composability</h2>
 
-					<em>Creating functions from other functions</em>
-				</section>
+							<em>Creating functions from other functions</em>
+						</section>
 
-				<section>
-					<h2>Life Before Composition</h2>
+						<section>
+							<h2>Life Before Composition</h2>
 
-					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers>
-// String -> String
-const reverseStringNaive =
-	str =>
-		str
-			.split("")
-			.reverse()
-			.join("");
+							<pre>
+								<code class="javascript" data-trim data-noescape data-line-numbers="1-18|1-7|9-14|16-17|19-20">
+									// String -> String
+									const reverseStringNaive =
+										str =>
+											str
+												.split("")
+												.reverse()
+												.join("");
 
-// RegExp -> String -> String
-const removeByPattern =
-	pattern =>
-		str =>
-			str
-				.replace(pattern, "");
+									// RegExp -> String -> String
+									const removeByPattern =
+										pattern =>
+											str =>
+												str
+													.replace(pattern, "");
 
-// String -> String
-const removeNonWordCharacters = removeByPattern(/\W/ig);
-const removeVowels = removeByPattern(/[AEIOU]/gi);
-						</code>
-					</pre>
-				</section>
+									// String -> String
+									const removeNonWordCharacters = removeByPattern(/\W/ig);
 
-				<section>
-					<h2>Life Before Composition</h2>
+									// String -> String
+									const removeVowels = removeByPattern(/[AEIOU]/gi);
+								</code>
+							</pre>
+						</section>
 
-					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers>
-const input = "The quick brown fox jumps over the lazy dog";
-const upper = toUpperCase(input);
-const reversed = reverseStringNaive(upper);
-const wordChars = removeNonWordCharacters(reversed);
-const noVowels = removeVowels(wordChars);
-// GDYZLHTRVSPMJXFNWRBKCQHT	
-						</code>
-					</pre>
-				</section>
+						<section>
+							<h2>Life Before Composition</h2>
 
-				<section>
-					<h2>Life Before Composition</h2>
+							<pre>
+								<code class="javascript" data-trim data-noescape data-line-numbers="1-6|1|2|3|4|5">
+									const input = "The quick brown fox jumps over the lazy dog";
+									const upper = toUpperCase(input);
+									const reversed = reverseStringNaive(upper);
+									const wordChars = removeNonWordCharacters(reversed);
+									const noVowels = removeVowels(wordChars);
+									// GDYZLHTRVSPMJXFNWRBKCQHT
+								</code>
+							</pre>
+						</section>
 
-					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers>
-const str =
-	removeVowels(
-		removeNonWordCharacters(
-			reverseStringNaive(
-				toUpperCase("The quick brown fox jumps over the lazy dog")
-			)
-		)
-	); // GDYZLHTRVSPMJXFNWRBKCQHT
-						</code>
-					</pre>
-				</section>
+							<section>
+								<h2>Life Before Composition</h2>
 
-				<section>
-					<h2>Composability</h2>
+								<pre>
+									<code class="javascript" data-trim data-noescape data-line-numbers="1-8|5|4,6|3,7|2,8">
+									const str =
+										removeVowels(
+											removeNonWordCharacters(
+												reverseStringNaive(
+													toUpperCase("The quick brown fox jumps over the lazy dog")
+												)
+											)
+										); // GDYZLHTRVSPMJXFNWRBKCQHT
+									</code>
+								</pre>
+							</section>
 
-					<div>Remember the reduce function?</div>
-			
-					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers>
-// Func<T, U>[] -> T -> U
-const compose =
-	(...functions) =>
-		value =>
-			functions
-				.reduce(
-					(result, fn) => fn(result),
-					value);
-						</code>
-					</pre>
-				</section>
+							<section>
+								<h2>Composability</h2>
 
-				<section>
-					<h2>Composability</h2>
-			
-					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers>
-compose(
-	toUpperCase,
-	reverseStringNaive,
-	removeNonWordCharacters,
-	removeVowels)("The quick brown fox jumps over the lazy dog");
-// GDYZLHTRVSPMJXFNWRBKCQHT
-						</code>
-					</pre>
-				</section>
+								<div>Remember the reduce function?</div>
+						
+								<pre>
+									<code class="javascript" data-trim data-noescape data-line-numbers="1-9|6|3|">
+										// Func<T, U>[] -> T -> U
+										const compose =
+											(...functions) =>
+												value =>
+													functions
+														.reduce(
+															(result, fn) => fn(result),
+															value);
+									</code>
+								</pre>
+							</section>
 
-				<section>
-					<h2>Composability</h2>
-			
-					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers>
-const transformString =
-	compose(
-		toUpperCase,
-		reverseStringNaive,
-		removeNonWordCharacters,
-		removeVowels);
+							<section>
+								<h2>Composability</h2>
+						
+								<pre>
+									<code class="javascript" data-trim data-noescape data-line-numbers>
+										compose(
+											toUpperCase,
+											reverseStringNaive,
+											removeNonWordCharacters,
+											removeVowels)("The quick brown fox jumps over the lazy dog");
+										// GDYZLHTRVSPMJXFNWRBKCQHT
+									</code>
+								</pre>
+							</section>
 
-transformString("The quick brown fox jumps over the lazy dog");
-// GDYZLHTRVSPMJXFNWRBKCQHT
-						</code>
-					</pre>
-				</section>
-			</section>
+							<section>
+								<h2>Composability</h2>
+						
+								<pre>
+									<code class="javascript" data-trim data-noescape data-line-numbers>
+										const transformString =
+											compose(
+												toUpperCase,
+												reverseStringNaive,
+												removeNonWordCharacters,
+												removeVowels);
 
-			<section>
-				<section>
-					<h2>Pipelining</h2>
+										transformString("The quick brown fox jumps over the lazy dog");
+										// GDYZLHTRVSPMJXFNWRBKCQHT
+									</code>
+								</pre>
+							</section>
+						</section>
 
-					<div>Single-use composition</div>
-					<div>Generalized fluent interface</div>
+						<section>
+							<section>
+								<h2>Pipelining</h2>
 
-					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers="2-5">
-"The quick brown fox jumps over the lazy dog"
-  [PIPE](toUpperCase)
-  [PIPE](reverseStringNaive)
-  [PIPE](removeNonWordCharacters)
-  [PIPE](removeVowels);
-// GDYZLHTRVSPMJXFNWRBKCQHT
-						</code>
-					</pre>
+								<div>Single-use composition</div>
+								<div>Generalized fluent interface</div>
 
-					<aside class="notes">There is currently a stage 2 proposal for adding a pipe operator to JavaScript</aside>
-				</section>
+								<pre>
+									<code class="javascript" data-trim data-noescape data-line-numbers="2-5">
+										"The quick brown fox jumps over the lazy dog"
+											[PIPE](toUpperCase)
+											[PIPE](reverseStringNaive)
+											[PIPE](removeNonWordCharacters)
+											[PIPE](removeVowels);
+											// GDYZLHTRVSPMJXFNWRBKCQHT
+									</code>
+								</pre>
 
-				<section>
-					<h2>Extending Objects</h2>
-			
-					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers>
-// T -> Func<T, U> -> Symbol
-const attachSymbol =
-  target =>
-    fn => {
-      const sym = Symbol();
+								<aside class="notes">There is currently a stage 2 proposal for adding a pipe operator to JavaScript</aside>
+							</section>
 
-      Reflect.defineProperty(
-        target,
-        sym,
-        {
-          enumerable: false,
-          writable: false,
-          configurable: false,
-          value: fn
-        }
-      );
+							<section>
+								<h2>Extending Objects</h2>
+						
+								<pre>
+									<code class="javascript" data-trim data-noescape data-line-numbers>
+										// T -> Func<T, U> -> Symbol
+										const attachSymbol =
+											target =>
+												fn => {
+													const sym = Symbol();
 
-      return sym;
-    };
-						</code>
-					</pre>
-				</section>
-			
-				<section>
-					<h2>Extending Objects</h2>
-			
-					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers>
-const attachSymbolToObjectPrototype =
-	attachSymbol(Object.prototype);
+													Reflect.defineProperty(
+														target,
+														sym,
+														{
+															enumerable: false,
+															writable: false,
+															configurable: false,
+															value: fn
+														}
+													);
 
-const PIPE =
-  attachSymbolToObjectPrototype(
-    function (fn) {
-      return fn(this);
-    });
+													return sym;
+												};
+									</code>
+								</pre>
+							</section>
+						
+							<section>
+								<h2>Extending Objects</h2>
+						
+								<pre>
+									<code class="javascript" data-trim data-noescape data-line-numbers>
+										const attachSymbolToObjectPrototype =
+											attachSymbol(Object.prototype);
 
-"The quick brown fox jumps over the lazy dog"
-  [PIPE](toUpperCase)
-  [PIPE](reverseStringNaive)
-  [PIPE](removeNonWordCharacters)
-  [PIPE](removeVowels); // GDYZLHTRVSPMJXFNWRBKCQHT
-						</code>
-					</pre>
-				</section>
+										const PIPE =
+											attachSymbolToObjectPrototype(
+												function (fn) {
+													return fn(this);
+												});
 
-			</section>
+										"The quick brown fox jumps over the lazy dog"
+											[PIPE](toUpperCase)
+											[PIPE](reverseStringNaive)
+											[PIPE](removeNonWordCharacters)
+											[PIPE](removeVowels);
+											// GDYZLHTRVSPMJXFNWRBKCQHT
+									</code>
+								</pre>
+							</section>
+						</section>
 
 			<section>
 				<section>
@@ -584,33 +613,33 @@ const PIPE =
 			
 					<pre>
 						<code class="javascript" data-trim data-noescape data-line-numbers>
-const validateModel =
-  validationModel =>
-    dataModel => {
-      const invalidProperties =
-        validationModel
-          [PIPE](Reflect.ownKeys)
-          .reduce(
-            (failures, key) => {
-              const validate = validationModel[key];
-              const value = dataModel[key];
+						const validateModel =
+							validationModel =>
+								dataModel => {
+									const invalidProperties =
+										validationModel
+											[PIPE](Reflect.ownKeys)
+											.reduce(
+												(failures, key) => {
+												const validate = validationModel[key];
+												const value = dataModel[key];
 
-              if (!validate(value)) {
-                failures.push(key);
-              }
+												if (!validate(value)) {
+													failures.push(key);
+												}
 
-              return failures;
-            },
-            [])
-            .join(", ");
+												return failures;
+												},
+											[])
+											.join(", ");
 
-        if (invalidProperties.length > 0) {
-          const msg = `Validation failed: ${invalidProperties}`;
-          throw new Error(msg);
-        }
+										if (invalidProperties.length > 0) {
+											const msg = `Validation failed: ${invalidProperties}`;
+											throw new Error(msg);
+										}
 
-        return dataModel;
-      };
+										return dataModel;
+									};
 						</code>
 					</pre>
 				</section>
@@ -620,24 +649,24 @@ const validateModel =
 			
 					<pre>
 						<code class="javascript" data-trim data-noescape data-line-numbers>
-const isString =
-  value =>
-    typeof value === "string";
+							const isString =
+								value =>
+									typeof value === "string";
 
-const isNotEmptyOrWhitespace =
-  value =>
-    isString(value)
-			&& value.length > 0
-			&& !/^\s*\S.*$/.test(value);
-			
-const isNumber =
-  value =>
-    typeof value === "number" && !isNaN(value);
-    
-const matchesPattern =
-  pattern =>
-    value =>
-      isString(value) && value.match(pattern);
+							const isNotEmptyOrWhitespace =
+								value =>
+									isString(value)
+										&& value.length > 0
+										&& !/^\s*\S.*$/.test(value);
+										
+							const isNumber =
+								value =>
+									typeof value === "number" && !isNaN(value);
+								
+							const matchesPattern =
+								pattern =>
+									value =>
+									isString(value) && value.match(pattern);
 						</code>
 					</pre>
 				</section>
@@ -647,21 +676,21 @@ const matchesPattern =
 			
 					<pre>
 						<code class="javascript" data-trim data-noescape data-line-numbers>
-const transformModel =
-  transformationModel =>
-    dataModel =>
-      transformationModel
-        [PIPE](Reflect.ownKeys)
-        .reduce(
-          (newModel, key) => {
-            const transform = transformationModel[key];
-            const value = dataModel[key];
+							const transformModel =
+								transformationModel =>
+									dataModel =>
+									transformationModel
+										[PIPE](Reflect.ownKeys)
+										.reduce(
+										(newModel, key) => {
+											const transform = transformationModel[key];
+											const value = dataModel[key];
 
-            return newModel[ATTACH_IMMUTABLE_PROPERTY](
-              key,
-              value ? transform(value) : value);
-          },
-          {});
+											return newModel[ATTACH_IMMUTABLE_PROPERTY](
+											key,
+											value ? transform(value) : value);
+										},
+										{});
 						</code>
 					</pre>
 				</section>
@@ -671,22 +700,22 @@ const transformModel =
 
 					<pre>
 						<code class="javascript" data-trim data-noescape data-line-numbers>
-const ID =
-  value => value;
+							const ID =
+							value => value;
 
-const trimString =
-  value => value.trim();
+							const trimString =
+							value => value.trim();
 
-const convertDurationToSeconds =
-  value =>
-    ({
-      .../^(?<minutes>\d{2}):(?<seconds>\d{2})$/
-        .exec(value)
-        .groups
-    })
-    [PIPE](
-      ({ minutes, seconds }) =>
-        (parseInt(minutes, 10) * 60) + parseInt(seconds));
+							const convertDurationToSeconds =
+							value =>
+								({
+								.../^(?<minutes>\d{2}):(?<seconds>\d{2})$/
+									.exec(value)
+									.groups
+								})
+								[PIPE](
+								({ minutes, seconds }) =>
+									(parseInt(minutes, 10) * 60) + parseInt(seconds));
 						</code>
 					</pre>
 				</section>
@@ -696,41 +725,41 @@ const convertDurationToSeconds =
 			
 					<pre>
 						<code class="javascript" data-trim data-noescape data-line-numbers>
-const validateMusicModel =
-  validateModel({
-    name: isNotEmptyOrWhitespace,
-    album: isNotEmptyOrWhitespace,
-    duration: matchesPattern(/^\d{2}:\d{2}$/),
-    releaseYear: isNumber,
-  });
+							const validateMusicModel =
+								validateModel({
+									name: isNotEmptyOrWhitespace,
+									album: isNotEmptyOrWhitespace,
+									duration: matchesPattern(/^\d{2}:\d{2}$/),
+									releaseYear: isNumber,
+								});
 
-const transformMusicModel =
-  transformModel({
-    name: trimString,
-    album: trimString,
-    duration: convertDurationToSeconds,
-    releaseYear: ID
-  });
+							const transformMusicModel =
+								transformModel({
+									name: trimString,
+									album: trimString,
+									duration: convertDurationToSeconds,
+									releaseYear: ID
+								});
 
-({
-  name: "\t\tNever Gonna Give You Up   ",
-  album: "Whenever You Need Somebody",
-  duration: "03:33",
-  releaseYear: 1987,
-})
-  [PIPE](validateMusicModel)
-  [PIPE](transformMusicModel)
-  [PIPE](value => JSON.stringify(value, null, 2))
-  [PIPE](value => console.info(value));
+							({
+								name: "\t\tNever Gonna Give You Up   ",
+								album: "Whenever You Need Somebody",
+								duration: "03:33",
+								releaseYear: 1987,
+							})
+								[PIPE](validateMusicModel)
+								[PIPE](transformMusicModel)
+								[PIPE](value => JSON.stringify(value, null, 2))
+								[PIPE](value => console.info(value));
 
-/*
-{ 
-  "name": "Never Gonna Give You Up", 
-  "album": "Whenever You Need Somebody", 
-  "duration": 213, 
-  "releaseYear": 1987 
-} 
-*/
+							/*
+							{ 
+								"name": "Never Gonna Give You Up", 
+								"album": "Whenever You Need Somebody", 
+								"duration": 213, 
+								"releaseYear": 1987 
+							}
+							*/
 						</code>
 					</pre>
 				</section>
@@ -741,6 +770,7 @@ const transformMusicModel =
 					<div style="flex: 1 1 300px">
 						<img src="./assets/qrcode_davefancher.github.io.png">
 					</div>
+
 					<div style="flex: 1 1 300px; text-align: left; padding-left: 20px;">
 						<h2>Thank You!</h2>
 
