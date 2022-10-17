@@ -65,6 +65,7 @@
 				<aside class="notes">
 					<ul>
 						<li>Eliminating side-effects is a lofty goal but software needs to do something</li>
+						<li>Immutability where possible</li>
 						<li>Statements perform an action, expressions return a value</li>
 						<li>Functions should be treated no differently than numbers, objects, strings, or anything else</li>
 						<li>
@@ -88,6 +89,19 @@
 			</section>
 
 			<section>
+				<section>
+					<h2>Immutability - Immutable.js</h2>
+
+					<ul>
+						<li class="fragment">
+							Yeah...
+							<span class="fragment fade-in">No</span>
+						</li>
+						<li class="fragment">Nice concept but it's still JS</li>
+						<li class="fragment">Offers little beyond other packages and some discipline</li>
+					</ul>					
+				</section>
+
 				<section>
 					<h2>Immutability - Object.freeze</h3>
 
@@ -147,8 +161,9 @@
 						<li class="fragment">Not just shorthand for classic functions</li>
 						<li class="fragment">The limitations are generally <em>good</em> for functional-flavored JS</li>
 						<li class="fragment">Bodied or implicit returns</li>
+						<li class="fragment">Synchronous or asyncronous</li>
 						<li class="fragment">Encourage composition</li>
-						<li class="fragment">Can still close around values</li>
+						<li class="fragment">Can still close around scoped values</li>
 					</ul>
 
 					<aside class="notes">
@@ -162,13 +177,13 @@
 					<pre>
 						<code class="javascript" data-trim data-noescape data-line-numbers="1-8|1-2|4-5|7-8">
 							const identity = x => x;
-							identity("Beer City Code");    // Beer City Code
+							identity("Indy.Code()");    // Indy.Code()
 
 							const toUpperCase = x => x.toUpperCase();
-							toUpperCase("Beer City Code"); // BEER CITY CODE
+							toUpperCase("Indy.Code()"); // INDY.CODE()
 
 							const toLowerCase = x => x.toLowerCase();
-							toLowerCase("BEER CITY CODE"); // beer city code
+							toLowerCase("Indy.Code()"); // indy.code()
 						</code>
 					</pre>
 
@@ -287,10 +302,11 @@
 					<h2>Reduce: Joining</h2>
 
 					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers="2-4|4|3">
+						<code class="javascript" data-trim data-noescape data-line-numbers="2-5|5|3-4">
 							// ...
 							.reduce(
-								(str, word) => str + (str.length ? " " : "") + word,
+								(str, word) =>
+									str + (str.length ? " " : "") + word,
 								"");
 							// ...
 						</code>
@@ -332,10 +348,11 @@
 
 					<p style="text-align: left;">Classic</p>
 					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers="2-5|3|1|5">
+						<code class="javascript" data-trim data-noescape data-line-numbers="2-6|3|1|6">
 							// (Number, Number) -> Number
 							const add =
-								(a, b) => a + b;
+								(a, b) =>
+									a + b;
 
 							const sum = add(5, 10); // 15
 						</code>
@@ -365,7 +382,8 @@
 							// Number -> Number -> Number
 							const add =
 								a =>
-									b => a + b;
+									b =>
+										a + b;
 								</code>
 							</pre>
 
@@ -381,7 +399,35 @@
 							<h3>More PFA</h3>
 
 							<pre>
-								<code class="javascript" data-trim data-noescape data-line-numbers="">
+								<code class="javascript" data-trim data-noescape data-line-numbers>
+								const filterReducer =
+									(filtered, word) => {
+										if (word.length >= 4) {
+											filtered.push(word);
+										}
+		
+										return filtered;
+									};
+								</code>
+							</pre>
+
+							<pre>
+								<code class="javascript" data-trim data-noescape data-line-numbers>
+								"The quick brown fox jumps over the lazy dog"
+									.split(" ")
+									.reduce(
+										filterReducer,
+										[]);
+									// [ 'quick', 'brown', 'jumps', 'over', 'lazy' ]
+								</code>
+							</pre>		
+						</section>
+
+						<section>
+							<h3>More PFA</h3>
+
+							<pre>
+								<code class="javascript" data-trim data-noescape data-line-numbers="2,4">
 									const filterReducer =
 										predicate =>
 											(filtered, item) => {
@@ -394,7 +440,7 @@
 								</code>
 							</pre>
 
-							<pre class="fragment">
+							<pre>
 								<code class="javascript" data-trim data-noescape data-line-numbers="4">
 									"The quick brown fox jumps over the lazy dog"
 										.split(" ")
