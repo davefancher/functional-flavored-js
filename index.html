@@ -54,38 +54,50 @@
 			</section>
 
 			<section>
-				<h2>Tenets of Functional Programming</h2>
+				<section>
+					<h2>Tenets of Functional Programming</h2>
 
-				<ol>
-					<li class="fragment">Purity/controlling side-effects</li>
-					<li class="fragment">Favor expressions over statements</li>
-					<li class="fragment">Functions as data</li>
-				</ol>
+					<ol>
+						<li class="fragment">Purity/controlling side-effects</li>
+						<li class="fragment">Favor expressions over statements</li>
+						<li class="fragment">Functions as data</li>
+					</ol>
+				</section>
 
-				<aside class="notes">
+				<section>
+					<h2>Purity/Controlling Side-Effects</h2>
+
 					<ul>
-						<li>Eliminating side-effects is a lofty goal but software needs to do something</li>
-						<li>Immutability where possible</li>
-						<li>Statements perform an action, expressions return a value</li>
-						<li>Functions should be treated no differently than numbers, objects, strings, or anything else</li>
-						<li>
-							Separate data from behavior
-							<ul>
-								<li>A method is a function with implied context</li>
-								<li>Functions should be given what they need to do their job</li>
-								<li>Explicitly pass in anything the function needs to make dependencies obvious</li>
-								<li>Acting upon implied context encourages side-effects</li>
-								<li>Providing all necessary input encourages composition</li>
-							</ul>
+						<li class="fragment">
+							<span>Immutability.</span>
+							<span class="fragment">Ha!</span>
+							<span class="fragment">...Kind of</span>
 						</li>
-						<li>
-							Limit side-effects to narrow scopes
-							<ul>
-								<li>Sometimes modifying values in-place is preferable to copying</li>
-							</ul>
-						</li>
+						<li class="fragment">Functions should use only what they're given</li>
+						<li class="fragment">Functions should not change external state</li>
+						<li class="fragment">Limit side-effects to as narrow a scope as possible</li>
 					</ul>
-				</aside>
+				</section>
+
+				<section>
+					<h2>Expressions vs Statements</h2>
+
+					<ul>
+						<li class="fragment">Statement-based language</li>
+						<li class="fragment">Built-in operators only</li>
+						<li class="fragment">Functions...</li>
+					</ul>
+				</section>
+
+				<section>
+					<h2>Functions as Data</h2>
+
+					<ul>
+						<li class="fragment">The basic building block in JS</li>
+						<li class="fragment">1st class citizens</li>
+						<li class="fragment">Higher-order functions</li>
+					</ul>
+				</section>
 			</section>
 
 			<section>
