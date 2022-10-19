@@ -174,16 +174,24 @@
 				<section>
 					<h2>Arrow Functions - Basic Examples</h2>
 
-					<pre>
+					<pre class="fragment semi-fade-out">
+						<code class="javascript" data-trim data-noescape data-line-numbers="1-8|1-2|4-5|7-8">
+							const toUpperCase = x => x.toUpperCase();
+							toUpperCase("Indy.Code()"); // INDY.CODE()
+						</code>
+					</pre>
+
+					<pre class="fragment fade-in-then-semi-out">
+						<code class="javascript" data-trim data-noescape data-line-numbers="1-8|1-2|4-5|7-8">
+							const toLowerCase = x => x.toLowerCase();
+							toLowerCase("Indy.Code()"); // indy.code()
+						</code>
+					</pre>
+
+					<pre class="fragment fade-in-then-semi-out">
 						<code class="javascript" data-trim data-noescape data-line-numbers="1-8|1-2|4-5|7-8">
 							const identity = x => x;
 							identity("Indy.Code()");    // Indy.Code()
-
-							const toUpperCase = x => x.toUpperCase();
-							toUpperCase("Indy.Code()"); // INDY.CODE()
-
-							const toLowerCase = x => x.toLowerCase();
-							toLowerCase("Indy.Code()"); // indy.code()
 						</code>
 					</pre>
 
