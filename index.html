@@ -599,23 +599,24 @@
 								<h2>Extending Objects</h2>
 						
 								<pre>
-									<code class="javascript" data-trim data-noescape data-line-numbers>
+									<code class="javascript" data-trim data-noescape data-line-numbers="2-22|3|4|5|7-17|19">
 										// T -> Func<T, U> -> Symbol
 										const attachSymbol =
 											target =>
 												fn => {
 													const sym = Symbol();
 
-													Reflect.defineProperty(
+													void Reflect.defineProperty(
 														target,
 														sym,
 														{
 															enumerable: false,
 															writable: false,
 															configurable: false,
-															value: fn
-														}
-													);
+															value: function () {
+																return fn(this)(...arguments);
+															}
+														});
 
 													return sym;
 												};
@@ -633,9 +634,8 @@
 
 										const PIPE =
 											attachSymbolToObjectPrototype(
-												function (fn) {
-													return fn(this);
-												});
+												context => fn => fn(context)
+											);
 
 										"The quick brown fox jumps over the lazy dog"
 											[PIPE](toUpperCase)
@@ -658,7 +658,7 @@
 					<h2>Model-based Validation</h2>
 			
 					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers>
+						<code class="javascript" data-trim data-noescape data-line-numbers="2-3|2,5-7|2,3,9,10|12-14|19|21-26">
 						const validateModel =
 							validationModel =>
 								dataModel => {
@@ -667,16 +667,16 @@
 											[PIPE](Reflect.ownKeys)
 											.reduce(
 												(failures, key) => {
-												const validate = validationModel[key];
-												const value = dataModel[key];
+													const validate = validationModel[key];
+													const value = dataModel[key];
 
-												if (!validate(value)) {
-													failures.push(key);
-												}
+													if (!validate(value)) {
+														failures.push(key);
+													}
 
-												return failures;
-												},
-											[])
+													return failures;
+													},
+												[])
 											.join(", ");
 
 										if (invalidProperties.length > 0) {
@@ -702,9 +702,8 @@
 							const isNotEmptyOrWhitespace =
 								value =>
 									isString(value)
-										&& value.length > 0
-										&& !/^\s*\S.*$/.test(value);
-										
+									&& value.trim().length > 0;
+																		
 							const isNumber =
 								value =>
 									typeof value === "number" && !isNaN(value);
@@ -721,22 +720,22 @@
 					<h2>Model-based Transformation</h2>
 			
 					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers>
+						<code class="javascript" data-trim data-noescape data-line-numbers="2,3|2-3,5-7|2-3,8-9|11|13">
 							const transformModel =
 								transformationModel =>
 									dataModel =>
-									transformationModel
+										transformationModel
 										[PIPE](Reflect.ownKeys)
-										.reduce(
-										(newModel, key) => {
-											const transform = transformationModel[key];
-											const value = dataModel[key];
-
-											return newModel[ATTACH_IMMUTABLE_PROPERTY](
-											key,
-											value ? transform(value) : value);
-										},
-										{});
+											.reduce(
+												(newModel, key) => {
+													const transform = transformationModel[key];
+													const value = dataModel[key];
+							
+													void Reflect.set(newModel, key, transform(value));
+							
+													return newModel;
+												},
+												{});
 						</code>
 					</pre>
 				</section>
@@ -746,22 +745,19 @@
 
 					<pre>
 						<code class="javascript" data-trim data-noescape data-line-numbers>
-							const ID =
-							value => value;
+							const ID = value => value;
 
-							const trimString =
-							value => value.trim();
+							const trimString = value => value.trim();
 
 							const convertDurationToSeconds =
-							value =>
-								({
-								.../^(?<minutes>\d{2}):(?<seconds>\d{2})$/
-									.exec(value)
-									.groups
-								})
-								[PIPE](
-								({ minutes, seconds }) =>
-									(parseInt(minutes, 10) * 60) + parseInt(seconds));
+								value => {
+									const { minutes, seconds } =
+										/^(?&lt;minutes&gt;\d{2}):(?&lt;seconds&gt;\d{2})$/
+											.exec(value)
+											.groups;
+							
+									return (parseInt(minutes, 10) * 60) + parseInt(seconds);
+								};
 						</code>
 					</pre>
 				</section>
@@ -770,7 +766,7 @@
 					<h2>Building the Pipeline</h2>
 			
 					<pre>
-						<code class="javascript" data-trim data-noescape data-line-numbers>
+						<code class="javascript" data-trim data-noescape data-line-numbers="1-7|9-15|17-25|27-34|36-44|46|5-6">
 							const validateMusicModel =
 								validateModel({
 									name: isNotEmptyOrWhitespace,
@@ -795,8 +791,7 @@
 							})
 								[PIPE](validateMusicModel)
 								[PIPE](transformMusicModel)
-								[PIPE](value => JSON.stringify(value, null, 2))
-								[PIPE](value => console.info(value));
+								[PIPE](value => JSON.stringify(value, null, 2));
 
 							/*
 							{ 
@@ -806,31 +801,45 @@
 								"releaseYear": 1987 
 							}
 							*/
+
+							({
+								name: "\t\tNever Gonna Give You Up   ",
+								album: "Whenever You Need Somebody",
+								duration: "3 minutes",
+								releaseYear: "1987",
+							})
+								[PIPE](validateMusicModel)
+								[PIPE](transformMusicModel)
+								[PIPE](value => JSON.stringify(value, null, 2));
+
+							// Validation failed: duration, releaseYear
 						</code>
 					</pre>
 				</section>
 			</section>
 
 			<section>
-				<div style="display: flex; flex-direction: row; align-items: flex-end;">
-					<div style="flex: 1 1 300px">
-						<img src="./assets/qrcode_davefancher.github.io.png">
-					</div>
+				<section>
+					<div style="display: flex; flex-direction: row; align-items: flex-end;">
+						<div style="flex: 1 1 300px">
+							<img src="./assets/qrcode_davefancher.github.io.png">
+						</div>
 
-					<div style="flex: 1 1 300px; text-align: left; padding-left: 20px;">
-						<h2>Thank You!</h2>
+						<div style="flex: 1 1 300px; text-align: left; padding-left: 20px;">
+							<h2>Thank You!</h2>
 
-						<p style="font-size: 0.5em">
-							Dave Fancher<br />
-							Lead Software Engineer - Vibenomics
-						</p>
-						<hr />
-						<p style="font-size: 0.5em">
-							Twitter: @davefancher<br />
-							LinkedIn: davefancher
-						</p>
+							<p style="font-size: 0.5em">
+								Dave Fancher<br />
+								Lead Software Engineer - Vibenomics
+							</p>
+							<hr />
+							<p style="font-size: 0.5em">
+								Twitter: @davefancher<br />
+								LinkedIn: davefancher
+							</p>
+						</div>
 					</div>
-				</div>
+				</section>
 			</section>
 		</div>
 	</div>
